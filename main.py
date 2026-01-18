@@ -1,7 +1,26 @@
-from fastapi import FastAPI, Path, HTTPException
+from fastapi import FastAPI, Path, HTTPException, Queue
+from pydantic import BaseModel, Field
+from typing import Annotated, Literal
 import json
 
-def load_data():
+# "P1": {
+#     "name": "Rahul Sharma",
+#     "age": 45,
+#     "gender": "male",
+#     "weight": 78,
+#     "height": 1.72,
+#     "bmi": 26.4,
+#     "condition": "obese"
+
+class Patient():
+    id: Annotated[str, Field(..., description='Enter the ID of the patient', examples=['P1','P2'])]
+    name: Annotated[str, Field(...,description='Enter the Name of the patient', examples=['Rahul', 'Vijay'])]
+    age: Annotated[int, Field(..., gt=0, lt=100, description='Enter the age')]
+    gender: Annotated[Literal['male','female','other'], Field(..., description='Enter the Gender')]
+    weight: Annotated[float, Field(..., gt=0, description='Enter the weight (Kg)')]
+    height: Annotated[float, Field(..., gt=0, description='Enter the Height (in m)')]
+
+def load_data(): 
     with open('patients.json', 'r') as f:
      data = json.load(f)
      return data
@@ -28,3 +47,8 @@ def view_patient(id: str = Path(..., description ="Enter the patient ID here", e
    if id in data:
       return data[id]
    raise HTTPException(status_code=404, detail='Patient Not FOUND!')
+
+@app.get("/sort")
+def sorted(sort_by: str = Queue(...,description="choose from ")):
+   pass
+   
