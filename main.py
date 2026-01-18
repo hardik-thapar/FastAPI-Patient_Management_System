@@ -1,5 +1,5 @@
 from fastapi import FastAPI, Path, HTTPException, Queue
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, computed_field
 from typing import Annotated, Literal
 import json
 
@@ -19,6 +19,23 @@ class Patient():
     gender: Annotated[Literal['male','female','other'], Field(..., description='Enter the Gender')]
     weight: Annotated[float, Field(..., gt=0, description='Enter the weight (Kg)')]
     height: Annotated[float, Field(..., gt=0, description='Enter the Height (in m)')]
+
+@computed_field
+@property
+def bmi(self)->float:
+   bmi=round(self.weight/(self.height**2),2)
+   return bmi
+
+@computed_field
+@property
+def condition(self)->str:
+   bmi=self.bmi
+
+   if(bmi<18.5):
+      return "underweight"
+   if(18.5<bmi<24.5):
+      return "normal"
+   return "obese"
 
 def load_data(): 
     with open('patients.json', 'r') as f:
